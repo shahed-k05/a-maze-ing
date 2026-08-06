@@ -135,12 +135,15 @@ class MazeGenerator():
                     front.append(n)
                     explored.append(n)
                     parent[(n.r,n.c)] = ((current_cell.r ,current_cell.c), d)
-        while current != (xs, ys):
-            parent_cell, d = parent[(current.r,current.c)]
+        current = (xe, ye)
+        start = (xs, ys)
+        while current != start:
+            parent_cell, d = parent[current]
             path.append(d)
-            current = parent_cell.key()
+            current = parent_cell
+        path.reverse()
 
-        print(path)
+        return ("".join(d.name[0] for d in path))
 
 
 
