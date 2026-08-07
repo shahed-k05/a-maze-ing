@@ -135,35 +135,20 @@ class MazeGenerator():
                     front.append(n)
                     explored.append(n)
                     parent[(n.r,n.c)] = ((current_cell.r ,current_cell.c), d)
+
         current = (xe, ye)
         start = (xs, ys)
+        if current not in parent and current != start:
+            return "there is no path leading to the end point"
         while current != start:
             parent_cell, d = parent[current]
             path.append(d)
             current = parent_cell
         path.reverse()
-
         return ("".join(d.name[0] for d in path))
 
 
 
 
 
-m = MazeGenerator(20,20, 42)
-# print("Cell values: before maze generation:")
 
-# for row in m.grid:
-#     print([c.calc_cell_value for c in row])
-m.generate("0,0")
-# for row in m.grid:
-#     print([f"({c.r}, {c.c})" for c in row])
-
-# print("Cell values: after maze generation:")
-# for row in m.grid:
-#     print([c for c in row])
-# print("\n\n\n\n\n")
-m.bfs_alg(("0,0"), ("10,10"))
-# n = []
-# for cell in m.grid:
-#     for i in cell:
-#         print(m.reachable_neighbors(i))

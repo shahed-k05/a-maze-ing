@@ -16,7 +16,6 @@ def read_config(config_file: str) -> dict[str, str]:
                     continue
                 key, value = line.split("=", 1)
                 config_dict[key.strip()] = value.strip()
-            print(config_dict)
         if not check_dim(config_dict):
             raise ConfigError("Invalid dimensions")
         return config_dict
