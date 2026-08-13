@@ -23,12 +23,22 @@ class Cell:
 
     @property
     def calc_cell_value(self) -> str:
+        """
+        returns the  hexadecimal value representing the cell walls
+        """
         cell_value = format(self.N * 1 + self.E * 2 + self.S * 4 + self.W * 8, 'X')
         return cell_value
 
 
 class MazeGenerator():
     def __init__(self, width: int, height: int, seed: int | None = None) -> None:
+        """Initialize the maze generator
+
+        args:
+            width: number of cells in each row.
+            height: number of rows in the maze.
+            seed: used to make maze generation reproducible.
+        """
         self.width: int = width
         self.height: int = height
         self.rng = np.random.default_rng(seed)
@@ -43,6 +53,13 @@ class MazeGenerator():
 
 
     def n_neighbors(self, cell: Cell) -> list[tuple[Cell, Directions]]:
+        """Return all unvisited neighboring cells.
+        args: 
+                cell: the cell whose neighbors shoulde be cheched
+        returns:
+                a list of tuples that conatains unvisited neighboring cell
+                and the dirc from the current cell to that neighbor
+        """
         n: list = []
         r = cell.r
         c = cell.c
@@ -58,10 +75,16 @@ class MazeGenerator():
         return n
 
 
-    def generate(self, entry: str):
-        start_row, start_col = entry.split(',', 1)
-        start_row = int(start_row)
-        start_col = int(start_col)
+    def generate(self, entry: tuple[int, int]) -> None:
+        """
+        generate a maze using depth first search
+        the algo starts from the entry cell 
+        and visits unvisited neighboring cells while removing the walls
+        between connected cells
+        args:
+            entry: The row and column coordinates of the starting cell.
+        """
+        start_row, start_col = entry
         cell = self.grid[start_row][start_col]
         cell.visited = True
         stack: list[Cell] = [cell]
@@ -89,6 +112,8 @@ class MazeGenerator():
 
 
     def create_output_file(self) -> str:
+        """create the hexadecimal representaion of the maze
+        """
         maze_str = ""
         for row in self.grid:
             for cell in row:
@@ -98,6 +123,14 @@ class MazeGenerator():
         return maze_str
 
     def reachable_neighbors(self, cell: Cell) -> list[tuple[Cell, Directions]]:
+        """
+        returns neghboring cells that can be reached without crossing walls
+        args:
+                cell: whose reachable neighbors should be checked
+        returns:
+                a list of tuples containing each reachable neighboring cell
+                and the direction from the current cell to that neighbor
+        """
         n: list = []
         r = cell.r
         c = cell.c
@@ -112,13 +145,18 @@ class MazeGenerator():
             n.append((self.grid[r][c - 1], Directions.WEST))
         return n
 
-    def bfs_alg(self, entry: str, exitpoint: str) -> str:
-        xs, ys = entry.split(',', 1)
-        xe, ye = exitpoint.split(',', 1)
-        xs = int(xs)
-        ys = int(ys)
-        xe = int(xe)
-        ye = int(ye)
+    def bfs_alg(self, entry: tuple[int, int], exitpoint: tuple[int, int]) -> str:
+        """
+        find the shortest path between the entry and exit using BFS
+        args:
+            entry: The row and column coordinates of the starting cell
+            exitpoint: The row and column coordinates of the destination cell
+        returns:
+            a string containing the dir of the shortest path
+        """
+        xs, ys = entry
+        xe, ye = exitpoint
+       
         front = [self.grid[xs][ys]]
         explored = [self.grid[xs][ys]]
         parent = {}
@@ -146,9 +184,20 @@ class MazeGenerator():
         path.reverse()
         return ("".join(d.name[0] for d in path))
 
-    def draw(self, entry: str, exitpoint: str, show_path: bool, color, color_reset) -> None:
-        xs, ys = entry.split(',', 1)
-        xe, ye = exitpoint.split(',', 1)
+    def draw(self, entry: tuple[int, int], exitpoint: tuple[int, int], show_path: bool, color, color_reset) -> None:
+        """
+        display the maze in the terminal
+        the entry is displayed as S, the exit as E, and the shortest path
+        can optionally be displayed using dots
+        args:
+                entry: The row and column coordinates of the maze entrance
+                exitpoint: The row and column coordinates of the maze exit
+                show_path: Whether to display the calculated path
+                color: The terminal color used to draw the maze
+                color_reset: The terminal escape sequence used to reset the color
+        """
+        xs, ys = entry
+        xe, ye = exitpoint
         top_line = "+"
         for cell in self.grid[0]:
             if cell.N:
@@ -163,10 +212,10 @@ class MazeGenerator():
                     middle_line += "|"
                 else:
                     middle_line += " "
-                if (str(cell.r), str(cell.c)) == (xs, ys):
+                if (cell.r, cell.c) == (xs, ys):
                         middle_line += " S "
                         continue
-                if (str(cell.r), str(cell.c)) == (xe, ye):
+                if (cell.r, cell.c) == (xe, ye):
                         middle_line += " E "
                         continue
                 if show_path:

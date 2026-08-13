@@ -22,9 +22,9 @@ def main() -> None:
         with open("output_maze.txt", "w") as f:
             f.write(output)
             f.write("\n\n")
-            f.write(config['ENTRY'])
+            f.write(str(config['ENTRY']))
             f.write("\n")
-            f.write(config['EXIT'])
+            f.write(str(config['EXIT']))
             f.write("\n")
             f.write(path)
         show_path = True
@@ -41,9 +41,9 @@ def main() -> None:
                 with open("output_maze.txt", "w") as f:
                     f.write(output)
                     f.write("\n\n")
-                    f.write(config['ENTRY'])
+                    f.write(str(config['ENTRY']))
                     f.write("\n")
-                    f.write(config['EXIT'])
+                    f.write(str(config['EXIT']))
                     f.write("\n")
                     f.write(path)
             if action == "2":
