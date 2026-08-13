@@ -28,7 +28,7 @@ def main() -> None:
             f.write("\n")
             f.write(path)
         show_path = True
-        color = "\u001b[37m"
+        color = Colors.DEFAULT
         color_reset = "\u001b[0m"
         while True:
             maze_gen_obj.draw(config['ENTRY'],config['EXIT'], show_path, color, color_reset)

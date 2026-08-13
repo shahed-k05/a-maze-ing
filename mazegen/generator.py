@@ -155,7 +155,7 @@ class MazeGenerator():
                 top_line += "---+"
             else:
                 top_line += "   +"
-        print(f"{color}{top_line}{color_reset}")
+        print(f"{color.value}{top_line}{color_reset}")
         for row in self.grid:
             middle_line = ""
             for cell in row:
@@ -178,14 +178,14 @@ class MazeGenerator():
                 middle_line += "|"
             else:
                 middle_line += " "
-            print(f"{color}{middle_line}{color_reset}")
+            print(f"{color.value}{middle_line}{color_reset}")
             bottom_line = "+"
             for cell in row:
                 if cell.S:
                     bottom_line += "---+"
                 else:
                     bottom_line += "   +"
-            print(f"{color}{bottom_line}{color_reset}")
+            print(f"{color.value}{bottom_line}{color_reset}")
         print()
         print()
         print("1. Re-generate a new maze and display it")
