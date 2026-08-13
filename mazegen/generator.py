@@ -33,6 +33,7 @@ class MazeGenerator():
         self.height: int = height
         self.rng = np.random.default_rng(seed)
         self.grid: list[list[Cell]] = []
+        self.coordinate = set()
         # row by row
         for row in range(height):
             row_list: list[Cell] = []
@@ -136,34 +137,58 @@ class MazeGenerator():
         start = (xs, ys)
         if current not in parent and current != start:
             return "there is no path leading to the end point"
+        self.coordinate.clear()
         while current != start:
             parent_cell, d = parent[current]
+            self.coordinate.add(parent_cell)
             path.append(d)
             current = parent_cell
         path.reverse()
         return ("".join(d.name[0] for d in path))
 
-    def draw(self):
-        for cell in self.grid:
-            for n in cell:
-                if n.N:
-                    print("+---", end="")
-                else:
-                    print("+   ", end="")
-            print("+")
-            for w in cell:
-                if w.W:
-                    print("|", end="")
-                else:
-                    print(" ", end="")
-                print("   ",end="")
-            if cell[-1].E:
-                print("|")
+    def draw(self, entry: str, exitpoint: str, show_path: bool, color, color_reset) -> None:
+        xs, ys = entry.split(',', 1)
+        xe, ye = exitpoint.split(',', 1)
+        top_line = "+"
+        for cell in self.grid[0]:
+            if cell.N:
+                top_line += "---+"
             else:
-                print("")
-            if cell[-1].S:
-                for s in cell:
-                    print("+---",end="")
-            if cell[-1].S:
-                print("+")
-                break
+                top_line += "   +"
+        print(f"{color}{top_line}{color_reset}")
+        for row in self.grid:
+            middle_line = ""
+            for cell in row:
+                if cell.W:
+                    middle_line += "|"
+                else:
+                    middle_line += " "
+                if (str(cell.r), str(cell.c)) == (xs, ys):
+                        middle_line += " S "
+                        continue
+                if (str(cell.r), str(cell.c)) == (xe, ye):
+                        middle_line += " E "
+                        continue
+                if show_path:
+                    if (cell.r, cell.c) in self.coordinate:
+                        middle_line += " . "
+                        continue
+                middle_line += "   "
+            if row[-1].E:
+                middle_line += "|"
+            else:
+                middle_line += " "
+            print(f"{color}{middle_line}{color_reset}")
+            bottom_line = "+"
+            for cell in row:
+                if cell.S:
+                    bottom_line += "---+"
+                else:
+                    bottom_line += "   +"
+            print(f"{color}{bottom_line}{color_reset}")
+        print()
+        print()
+        print("1. Re-generate a new maze and display it")
+        print("2. Show/Hide a valid shortest path from the entrance to the exit")
+        print("3. Change maze wall colors")
+        print("4. Exit")
