@@ -1,9 +1,9 @@
-WIDTH=20
-HEIGHT=20
+WIDTH=10
+HEIGHT=10
 # The start point
 ENTRY=0,0
 # The end point
-EXIT=12,8
+EXIT=9,9
 OUTPUT_FILE=maze.txt
 PERFECT=True
 SEED = 42

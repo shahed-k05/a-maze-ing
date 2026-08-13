@@ -87,17 +87,13 @@ class MazeGenerator():
                 stack.pop()
 
 
-    def create_output_file(self, entry: str, exit_point: str) -> str:
+    def create_output_file(self) -> str:
         maze_str = ""
         for row in self.grid:
             for cell in row:
                 maze_str += cell.calc_cell_value
             if row != self.grid[-1]:
                 maze_str += "\n"
-        maze_str += "\n\n"
-        maze_str += entry
-        maze_str += "\n"
-        maze_str += exit_point
         return maze_str
 
     def reachable_neighbors(self, cell: Cell) -> list[tuple[Cell, Directions]]:
@@ -147,8 +143,27 @@ class MazeGenerator():
         path.reverse()
         return ("".join(d.name[0] for d in path))
 
-
-
-
-
-
+    def draw(self):
+        for cell in self.grid:
+            for n in cell:
+                if n.N:
+                    print("+---", end="")
+                else:
+                    print("+   ", end="")
+            print("+")
+            for w in cell:
+                if w.W:
+                    print("|", end="")
+                else:
+                    print(" ", end="")
+                print("   ",end="")
+            if cell[-1].E:
+                print("|")
+            else:
+                print("")
+            if cell[-1].S:
+                for s in cell:
+                    print("+---",end="")
+            if cell[-1].S:
+                print("+")
+                break
