@@ -34,13 +34,13 @@ def read_config(config_file: str) -> dict:
 
     except Exception as e:
         print(e)
-def parse_coordinate(value:str) ->tuple[int, int]:
+def parse_coordinate(value:str) -> tuple[int, int]:
     """
     converts a coordinate string into tuple of integers
 
     """
     
-    x,y = value.split(",",1)
+    x, y = value.split(",",1)
     return int(x.strip()), int(y.strip())
 
 def check_dim(config: dict) -> bool:

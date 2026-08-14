@@ -2,8 +2,15 @@
 # standalone module that can be imported in a future project.
 from dataclasses import dataclass
 from enum import Enum
-#import random
-import numpy as np
+import sys
+
+try:
+    import numpy as np
+except ModuleNotFoundError:
+    print("Package is missing. Please run: pip install -r requirements.txt")
+    sys.exit(1)
+
+
 class Directions(Enum):
     NORTH = 1
     EAST = 2
@@ -44,6 +51,7 @@ class MazeGenerator():
         self.rng = np.random.default_rng(seed)
         self.grid: list[list[Cell]] = []
         self.coordinate = set()
+        self.logo: list [tuple[int, int]] = []
         # row by row
         for row in range(height):
             row_list: list[Cell] = []
@@ -91,8 +99,12 @@ class MazeGenerator():
         while stack:
             current = stack[-1]
             n = self.n_neighbors(current)
+            n = [(c, d) for c, d in n if (c.r, c.c) not in self.logo]
             if n:
                 next_cell, direction = n[self.rng.integers(len(n))]
+                # if (next_cell.r, next_cell.c) in self.logo:
+                #     stack.pop()
+                #     continue
                 if direction == Directions.NORTH:
                     current.N = False
                     next_cell.S = False
@@ -111,8 +123,9 @@ class MazeGenerator():
                 stack.pop()
 
 
-    def create_output_file(self) -> str:
-        """create the hexadecimal representaion of the maze
+    def create_output_file(self, entry: str, exitpoint: str, path: str) -> None:
+        """
+        create the hexadecimal representaion of the maze
         """
         maze_str = ""
         for row in self.grid:
@@ -120,7 +133,15 @@ class MazeGenerator():
                 maze_str += cell.calc_cell_value
             if row != self.grid[-1]:
                 maze_str += "\n"
-        return maze_str
+        with open("output_maze.txt", "w") as f:
+            f.write(maze_str)
+            f.write("\n\n")
+            f.write(entry)
+            f.write("\n")
+            f.write(exitpoint)
+            f.write("\n")
+            f.write(path)
+
 
     def reachable_neighbors(self, cell: Cell) -> list[tuple[Cell, Directions]]:
         """
@@ -184,7 +205,7 @@ class MazeGenerator():
         path.reverse()
         return ("".join(d.name[0] for d in path))
 
-    def draw(self, entry: tuple[int, int], exitpoint: tuple[int, int], show_path: bool, color, color_reset) -> None:
+    def draw(self, entry: tuple[int, int], exitpoint: tuple[int, int], show_path: bool, color: str, color_reset: str) -> None:
         """
         display the maze in the terminal
         the entry is displayed as S, the exit as E, and the shortest path
@@ -198,25 +219,26 @@ class MazeGenerator():
         """
         xs, ys = entry
         xe, ye = exitpoint
-        top_line = "+"
+        top_line = "█"
+
         for cell in self.grid[0]:
             if cell.N:
-                top_line += "---+"
+                top_line += "████"
             else:
-                top_line += "   +"
+                top_line += "   ━"
         print(f"{color.value}{top_line}{color_reset}")
         for row in self.grid:
             middle_line = ""
             for cell in row:
                 if cell.W:
-                    middle_line += "|"
+                    middle_line += "█"
                 else:
                     middle_line += " "
                 if (cell.r, cell.c) == (xs, ys):
-                        middle_line += " S "
+                        middle_line += " 🐀"
                         continue
                 if (cell.r, cell.c) == (xe, ye):
-                        middle_line += " E "
+                        middle_line += " 🪤"
                         continue
                 if show_path:
                     if (cell.r, cell.c) in self.coordinate:
@@ -224,16 +246,16 @@ class MazeGenerator():
                         continue
                 middle_line += "   "
             if row[-1].E:
-                middle_line += "|"
+                middle_line += "█"
             else:
                 middle_line += " "
             print(f"{color.value}{middle_line}{color_reset}")
-            bottom_line = "+"
+            bottom_line = "█"
             for cell in row:
                 if cell.S:
-                    bottom_line += "---+"
+                    bottom_line += "████"
                 else:
-                    bottom_line += "   +"
+                    bottom_line += "   █"
             print(f"{color.value}{bottom_line}{color_reset}")
         print()
         print()
@@ -241,3 +263,38 @@ class MazeGenerator():
         print("2. Show/Hide a valid shortest path from the entrance to the exit")
         print("3. Change maze wall colors")
         print("4. Exit")
+    
+    
+    def logo_42(self, width: int, height: int) -> None:
+        if int(width) % 2 == 0:
+            x = (int(width) // 2) - 1
+        else:
+            x = (int(width) // 2) + 1
+        if int(height) % 2 == 0:
+            y = (int(height) // 2) - 1
+        else:
+            y = (int(height) // 2) + 1
+        
+        self.logo = [
+            (y - 2, x - 3),
+            (y - 1, x - 3),
+            (y, x - 3),
+            (y, x - 2),
+            (y, x - 1),
+            (y + 1, x - 1),
+            (y + 2, x - 1),
+            (y - 2, x + 1),
+            (y - 2, x + 2),
+            (y - 2, x + 3),
+            (y - 1, x + 3),
+            (y, x + 3),
+            (y, x + 2),
+            (y, x + 1),
+            (y + 1, x + 1),
+            (y + 2, x + 1),
+            (y + 2, x + 2),
+            (y + 2, x + 3)
+        ]
+
+
+
