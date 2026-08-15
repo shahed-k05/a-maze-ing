@@ -2,7 +2,7 @@ from enum import Enum
 
 
 class Colors(Enum):
-    DEFAULT = "\u001b[37m"
+    DEFAULT = "\033[37m"
     RED = "\033[0;31m"
     GREEN = "\033[0;32m"
     BROWN = "\033[0;33m"

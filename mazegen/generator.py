@@ -62,7 +62,7 @@ class MazeGenerator():
 
     def n_neighbors(self, cell: Cell) -> list[tuple[Cell, Directions]]:
         """Return all unvisited neighboring cells.
-        args: 
+        args:
                 cell: the cell whose neighbors shoulde be cheched
         returns:
                 a list of tuples that conatains unvisited neighboring cell
@@ -86,7 +86,7 @@ class MazeGenerator():
     def generate(self, entry: tuple[int, int]) -> None:
         """
         generate a maze using depth first search
-        the algo starts from the entry cell 
+        the algo starts from the entry cell
         and visits unvisited neighboring cells while removing the walls
         between connected cells
         args:
@@ -177,7 +177,7 @@ class MazeGenerator():
         """
         xs, ys = entry
         xe, ye = exitpoint
-       
+
         front = [self.grid[xs][ys]]
         explored = [self.grid[xs][ys]]
         parent = {}
@@ -219,13 +219,13 @@ class MazeGenerator():
         """
         xs, ys = entry
         xe, ye = exitpoint
-        top_line = "█"
+        top_line = "▄"
 
         for cell in self.grid[0]:
             if cell.N:
-                top_line += "████"
+                top_line += "▄▄▄▄"
             else:
-                top_line += "   ━"
+                top_line += "   ▄"
         print(f"{color.value}{top_line}{color_reset}")
         for row in self.grid:
             middle_line = ""
@@ -234,15 +234,18 @@ class MazeGenerator():
                     middle_line += "█"
                 else:
                     middle_line += " "
+                if (cell.r, cell.c) in self.logo:
+                    middle_line += f"\033[97m░░░{color.value}"
+                    continue
                 if (cell.r, cell.c) == (xs, ys):
-                        middle_line += " 🐀"
-                        continue
+                    middle_line += " 🐀"
+                    continue
                 if (cell.r, cell.c) == (xe, ye):
-                        middle_line += " 🪤"
-                        continue
+                    middle_line += " 🪤"
+                    continue
                 if show_path:
                     if (cell.r, cell.c) in self.coordinate:
-                        middle_line += " . "
+                        middle_line += f"\033[97m • {color.value}"
                         continue
                 middle_line += "   "
             if row[-1].E:
@@ -250,12 +253,20 @@ class MazeGenerator():
             else:
                 middle_line += " "
             print(f"{color.value}{middle_line}{color_reset}")
-            bottom_line = "█"
-            for cell in row:
-                if cell.S:
-                    bottom_line += "████"
-                else:
-                    bottom_line += "   █"
+            if self.grid.index(row) == len(self.grid) - 1:
+                bottom_line = "▀"
+                for cell in row:
+                    if cell.S:
+                        bottom_line += "▀▀▀▀"
+                    else:
+                        bottom_line += "   ▀"
+            else:
+                bottom_line = "█"
+                for cell in row:
+                    if cell.S:
+                        bottom_line += "████"
+                    else:
+                        bottom_line += "   █"
             print(f"{color.value}{bottom_line}{color_reset}")
         print()
         print()
@@ -263,8 +274,8 @@ class MazeGenerator():
         print("2. Show/Hide a valid shortest path from the entrance to the exit")
         print("3. Change maze wall colors")
         print("4. Exit")
-    
-    
+
+
     def logo_42(self, width: int, height: int) -> None:
         if int(width) % 2 == 0:
             x = (int(width) // 2) - 1
@@ -274,7 +285,7 @@ class MazeGenerator():
             y = (int(height) // 2) - 1
         else:
             y = (int(height) // 2) + 1
-        
+
         self.logo = [
             (y - 2, x - 3),
             (y - 1, x - 3),
