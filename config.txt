@@ -1,5 +1,5 @@
-WIDTH=20
-HEIGHT=20
+WIDTH=16
+HEIGHT=16
 # The start point
 ENTRY=0,3
 # The end point

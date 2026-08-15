@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from enum import Enum
 import sys
-
+from .colors import Colors
 try:
     import numpy as np
 except ModuleNotFoundError:
@@ -123,7 +123,7 @@ class MazeGenerator():
                 stack.pop()
 
 
-    def create_output_file(self, entry: str, exitpoint: str, path: str) -> None:
+    def create_output_file(self, entry: str, exitpoint: str, file: str, path: str) -> None:
         """
         create the hexadecimal representaion of the maze
         """
@@ -133,7 +133,7 @@ class MazeGenerator():
                 maze_str += cell.calc_cell_value
             if row != self.grid[-1]:
                 maze_str += "\n"
-        with open("output_maze.txt", "w") as f:
+        with open(file, "w") as f:
             f.write(maze_str)
             f.write("\n\n")
             f.write(entry)
@@ -235,7 +235,7 @@ class MazeGenerator():
                 else:
                     middle_line += " "
                 if (cell.r, cell.c) in self.logo:
-                    middle_line += f"\033[97m░░░{color.value}"
+                    middle_line += f"{Colors.LIGHT_WHITE.value}░░░{color.value}"
                     continue
                 if (cell.r, cell.c) == (xs, ys):
                     middle_line += " 🐀"
@@ -245,7 +245,7 @@ class MazeGenerator():
                     continue
                 if show_path:
                     if (cell.r, cell.c) in self.coordinate:
-                        middle_line += f"\033[97m • {color.value}"
+                        middle_line += f"{Colors.LIGHT_WHITE.value} • {color.value}"
                         continue
                 middle_line += "   "
             if row[-1].E:

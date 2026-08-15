@@ -20,9 +20,9 @@ def main() -> None:
         else:
             maze_gen_obj.logo_42(int(config['WIDTH']), int(config['HEIGHT']))
         maze_gen_obj.generate(config['ENTRY'])
-        
+
         path = maze_gen_obj.bfs_alg(config['ENTRY'], config['EXIT'])
-        maze_gen_obj.create_output_file(str(config['ENTRY']), str(config['EXIT']), path)
+        maze_gen_obj.create_output_file(str(config['ENTRY']), str(config['EXIT']), config['OUTPUT_FILE'], path)
         show_path = True
         color = Colors.DEFAULT
         color_reset = "\u001b[0m"
@@ -37,14 +37,14 @@ def main() -> None:
                     maze_gen_obj.logo_42(int(config['WIDTH']), int(config['HEIGHT']))
                 maze_gen_obj.generate(config['ENTRY'])
                 path = maze_gen_obj.bfs_alg(config['ENTRY'],config['EXIT'])
-                maze_gen_obj.create_output_file(str(config['ENTRY']), str(config['EXIT']), path)
-            
+                maze_gen_obj.create_output_file(str(config['ENTRY']), str(config['EXIT']), config['OUTPUT_FILE'], path)
+
             if action == "2":
                 show_path = not show_path
-            
+
             if action == "3":
                 color = random.choice(list(Colors))
-            
+
             if action == "4":
                 break
 
