@@ -102,9 +102,6 @@ class MazeGenerator():
             n = [(c, d) for c, d in n if (c.r, c.c) not in self.logo]
             if n:
                 next_cell, direction = n[self.rng.integers(len(n))]
-                # if (next_cell.r, next_cell.c) in self.logo:
-                #     stack.pop()
-                #     continue
                 if direction == Directions.NORTH:
                     current.N = False
                     next_cell.S = False
@@ -121,12 +118,94 @@ class MazeGenerator():
                 stack.append(next_cell)
             else:
                 stack.pop()
+        for row in self.grid:
+            for cell in row:
+                cell.visited = False
+
+            
+
+    def check_3X3(self,cell:Cell) -> bool:
+        """
+        The maze can’t have large open areas. Corridors can’t be wider than 2 cells.
+        For example, you can have 2x3 or 3x2 open area, but never a 3x3 open area.
+        """
+        if cell.r + 2 >= self.height or cell.c +2 >= self.width:
+            return False
+        reachable_n3X3 = [cell]
+        visited = {(cell.r, cell.c)}
+        while reachable_n3X3:
+            current = reachable_n3X3.pop(0)
+            for n,d in self.reachable_neighbors(current):
+                if not(
+                    cell.r <= n.r <= cell.r + 2
+                    and cell.c <= n.c <= cell.c + 2):
+                    continue
+                if (n.r, n.c) not in visited:
+                    visited.add((n.r, n.c))
+                    reachable_n3X3.append(n)
+        return len(visited) == 9
+    
+    def break_deadends(self) -> None:
+        
+        
+        for row in self.grid:
+            for cell in row:
+                counter = 0
+                if (cell.r, cell.c) in self.logo:
+                    continue
+                if cell.N:
+                    counter += 1
+                if cell.E:
+                    counter += 1
+                if cell.W:
+                    counter += 1
+                if cell.S:
+                    counter += 1
+                if counter >= 3:
+                    self.break_walls(cell)
 
 
-    def create_output_file(self, entry: str, exitpoint: str, file: str, path: str) -> None:
+    def break_walls(self, cell: Cell):
+        n = self.n_neighbors(cell)
+        n = [(c, d) for c, d in n if (c.r, c.c) not in self.logo]
+        if n:
+            next_cell, direction = n[self.rng.integers(len(n))]
+            if direction == Directions.NORTH:
+                cell.N = False
+                next_cell.S = False
+            elif direction == Directions.EAST:
+                cell.E = False
+                next_cell.W = False
+            elif direction == Directions.SOUTH:
+                cell.S = False
+                next_cell.N = False
+            elif direction == Directions.WEST:
+                cell.W = False
+                next_cell.E = False
+
+
+    def imperfect_Maze(self) -> None:
+        """
+        in case the maze is not perfect this function loops for it.
+        it uses n_neighbors to access unreachable neighbors.
+        """
+        for row in self.grid:
+            for cell in row:
+                if self.check_3X3(cell):
+                    continue
+                if (cell.r, cell.c) in self.logo:
+                    continue
+                else:
+                    self.break_walls(cell)
+        self.break_deadends()
+                
+
+    def create_output_file(self, entry: tuple[int, int], exitpoint: tuple[int, int], file: str, path: str) -> None:
         """
         create the hexadecimal representaion of the maze
         """
+        Entry = f"{entry[0]}, {entry[1]}"
+        Exitpoint = f"{exitpoint[0]}, {exitpoint[1]}"
         maze_str = ""
         for row in self.grid:
             for cell in row:
@@ -136,12 +215,11 @@ class MazeGenerator():
         with open(file, "w") as f:
             f.write(maze_str)
             f.write("\n\n")
-            f.write(entry)
+            f.write(Entry)
             f.write("\n")
-            f.write(exitpoint)
+            f.write(Exitpoint)
             f.write("\n")
             f.write(path)
-
 
     def reachable_neighbors(self, cell: Cell) -> list[tuple[Cell, Directions]]:
         """
@@ -276,16 +354,15 @@ class MazeGenerator():
         print("4. Exit")
 
 
-    def logo_42(self, width: int, height: int) -> None:
-        if int(width) % 2 == 0:
-            x = (int(width) // 2) - 1
+    def logo_42(self, Entry: tuple[int, int], Exitpoint: tuple[int, int] ,width: int, height: int) -> None:        
+        if width % 2 == 0:
+            x = (width // 2) - 1
         else:
-            x = (int(width) // 2) + 1
-        if int(height) % 2 == 0:
-            y = (int(height) // 2) - 1
+            x = (width // 2) + 1
+        if height % 2 == 0:
+            y = (height // 2) - 1
         else:
-            y = (int(height) // 2) + 1
-
+            y = (height // 2) + 1
         self.logo = [
             (y - 2, x - 3),
             (y - 1, x - 3),
@@ -306,6 +383,11 @@ class MazeGenerator():
             (y + 2, x + 2),
             (y + 2, x + 3)
         ]
-
-
-
+        xs,ys = Entry
+        xe,ye = Exitpoint
+        if xs == x or xe == x:
+            raise Exception("Coordinate Error")
+        if ye == y or ys == ye:
+            raise Exception("Coordinate Error")
+        if (Entry in self.logo) or (Exitpoint in self.logo):
+            raise Exception("Coordinate Error")
