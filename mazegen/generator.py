@@ -220,6 +220,7 @@ class MazeGenerator():
             f.write(Exitpoint)
             f.write("\n")
             f.write(path)
+            f.write('\n')
 
     def reachable_neighbors(self, cell: Cell) -> list[tuple[Cell, Directions]]:
         """
@@ -363,6 +364,7 @@ class MazeGenerator():
             y = (height // 2) - 1
         else:
             y = (height // 2) + 1
+
         self.logo = [
             (y - 2, x - 3),
             (y - 1, x - 3),
@@ -383,11 +385,7 @@ class MazeGenerator():
             (y + 2, x + 2),
             (y + 2, x + 3)
         ]
-        xs,ys = Entry
-        xe,ye = Exitpoint
-        if xs == x or xe == x:
-            raise Exception("Coordinate Error")
-        if ye == y or ys == ye:
-            raise Exception("Coordinate Error")
+        print(self.logo)
+
         if (Entry in self.logo) or (Exitpoint in self.logo):
             raise Exception("Coordinate Error")

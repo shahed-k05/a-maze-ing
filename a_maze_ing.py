@@ -12,7 +12,7 @@ def main() -> None:
     try:
         config = read_config(sys.argv[1])
         maze_gen_obj = MazeGenerator(int(config['WIDTH']), int(config['HEIGHT']), int(config['SEED']))
-        if int(config['WIDTH']) < 8 or int(config['HEIGHT']) <6 :
+        if int(config['WIDTH']) < 8 or int(config['HEIGHT']) < 6:
             print("Warning: maze too small")
         else:
             try:
@@ -48,9 +48,7 @@ def main() -> None:
                     maze_gen_obj.imperfect_Maze()
 
                 path = maze_gen_obj.bfs_alg(config['ENTRY'],config['EXIT'])
-                maze_gen_obj.create_output_file(str(config['ENTRY']), str(config['EXIT']), config['OUTPUT_FILE'], path)
-               # if config['PERFECT'] == "False":
-                #    maze_gen_obj.imperfect_Maze()
+                maze_gen_obj.create_output_file(config['ENTRY'], config['EXIT'], config['OUTPUT_FILE'], path)
             if action == "2":
                 show_path = not show_path
 

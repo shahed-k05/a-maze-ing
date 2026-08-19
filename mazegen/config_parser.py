@@ -3,7 +3,6 @@ import sys
 class ConfigError(Exception):
     pass
 
-
 def read_config(config_file: str) -> dict:
     """
     read and validate the maze config file
@@ -27,8 +26,11 @@ def read_config(config_file: str) -> dict:
                 config_dict[key.strip()] = value.strip()
         config_dict["ENTRY"] = parse_coordinate(config_dict["ENTRY"])
         config_dict["EXIT"] = parse_coordinate(config_dict["EXIT"])
+        print(config_dict["ENTRY"])
+        print(config_dict["EXIT"])
         if not check_dim(config_dict):
             raise ConfigError("Invalid dimensions")
+        print(config_dict)
         return config_dict
 
     except Exception as e:
@@ -39,8 +41,9 @@ def parse_coordinate(value:str) -> tuple[int, int]:
 
     """
     
-    x, y = value.split(",",1)
-    return int(x.strip()), int(y.strip())
+    row, col = value.split(",",1)
+    
+    return int(row.strip()), int(col.strip())
 
 def check_dim(config: dict) -> bool:
     """
