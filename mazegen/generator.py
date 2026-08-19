@@ -1,14 +1,7 @@
-# You must implement the maze generation as a unique class (e.g., ‘MazeGenerator‘) inside a
-# standalone module that can be imported in a future project.
 from dataclasses import dataclass
 from enum import Enum
-import sys
 from .colors import Colors
-try:
-    import numpy as np
-except ModuleNotFoundError:
-    print("Package is missing. Please run: pip install -r requirements.txt")
-    sys.exit(1)
+import random
 
 
 class Directions(Enum):
@@ -16,6 +9,7 @@ class Directions(Enum):
     EAST = 2
     SOUTH = 3
     WEST = 4
+
 
 @dataclass
 class Cell:
@@ -33,12 +27,15 @@ class Cell:
         """
         returns the  hexadecimal value representing the cell walls
         """
-        cell_value = format(self.N * 1 + self.E * 2 + self.S * 4 + self.W * 8, 'X')
+        cell_value = format(
+                self.N * 1 + self.E * 2 + self.S * 4 + self.W * 8, "X"
+                )
         return cell_value
 
 
-class MazeGenerator():
-    def __init__(self, width: int, height: int, seed: int | None = None) -> None:
+class MazeGenerator:
+    def __init__(self, width: int, height: int,
+                 seed: int | None = None) -> None:
         """Initialize the maze generator
 
         args:
@@ -48,17 +45,16 @@ class MazeGenerator():
         """
         self.width: int = width
         self.height: int = height
-        self.rng = np.random.default_rng(seed)
+        self.rng = random.Random(seed)
         self.grid: list[list[Cell]] = []
-        self.coordinate = set()
-        self.logo: list [tuple[int, int]] = []
+        self.coordinate: set[tuple[int, int]] = set()
+        self.logo: list[tuple[int, int]] = []
         # row by row
         for row in range(height):
             row_list: list[Cell] = []
             for col in range(width):
                 row_list.append(Cell(r=row, c=col))
             self.grid.append(row_list)
-
 
     def n_neighbors(self, cell: Cell) -> list[tuple[Cell, Directions]]:
         """Return all unvisited neighboring cells.
@@ -68,7 +64,7 @@ class MazeGenerator():
                 a list of tuples that conatains unvisited neighboring cell
                 and the dirc from the current cell to that neighbor
         """
-        n: list = []
+        n: list[tuple[Cell, Directions]] = []
         r = cell.r
         c = cell.c
 
@@ -81,7 +77,6 @@ class MazeGenerator():
         if c > 0 and not self.grid[r][c - 1].visited:
             n.append((self.grid[r][c - 1], Directions.WEST))
         return n
-
 
     def generate(self, entry: tuple[int, int]) -> None:
         """
@@ -101,7 +96,7 @@ class MazeGenerator():
             n = self.n_neighbors(current)
             n = [(c, d) for c, d in n if (c.r, c.c) not in self.logo]
             if n:
-                next_cell, direction = n[self.rng.integers(len(n))]
+                next_cell, direction = self.rng.choice(n)
                 if direction == Directions.NORTH:
                     current.N = False
                     next_cell.S = False
@@ -122,32 +117,29 @@ class MazeGenerator():
             for cell in row:
                 cell.visited = False
 
-            
-
-    def check_3X3(self,cell:Cell) -> bool:
+    def check_3X3(self, cell: Cell) -> bool:
         """
-        The maze can’t have large open areas. Corridors can’t be wider than 2 cells.
-        For example, you can have 2x3 or 3x2 open area, but never a 3x3 open area.
+        The maze can’t have large open areas.
+        Corridors can’t be wider than 2 cells.
+        For example, you can have 2x3 or 3x2 open area
+        but never a 3x3 open area.
         """
-        if cell.r + 2 >= self.height or cell.c +2 >= self.width:
+        if cell.r + 2 >= self.height or cell.c + 2 >= self.width:
             return False
         reachable_n3X3 = [cell]
         visited = {(cell.r, cell.c)}
         while reachable_n3X3:
             current = reachable_n3X3.pop(0)
-            for n,d in self.reachable_neighbors(current):
-                if not(
-                    cell.r <= n.r <= cell.r + 2
-                    and cell.c <= n.c <= cell.c + 2):
+            for n, d in self.reachable_neighbors(current):
+                if not (cell.r <= n.r <= cell.r + 2 and
+                        cell.c <= n.c <= cell.c + 2):
                     continue
                 if (n.r, n.c) not in visited:
                     visited.add((n.r, n.c))
                     reachable_n3X3.append(n)
         return len(visited) == 9
-    
+
     def break_deadends(self) -> None:
-        
-        
         for row in self.grid:
             for cell in row:
                 counter = 0
@@ -164,12 +156,11 @@ class MazeGenerator():
                 if counter >= 3:
                     self.break_walls(cell)
 
-
-    def break_walls(self, cell: Cell):
+    def break_walls(self, cell: Cell) -> None:
         n = self.n_neighbors(cell)
         n = [(c, d) for c, d in n if (c.r, c.c) not in self.logo]
         if n:
-            next_cell, direction = n[self.rng.integers(len(n))]
+            next_cell, direction = self.rng.choice(n)
             if direction == Directions.NORTH:
                 cell.N = False
                 next_cell.S = False
@@ -182,7 +173,6 @@ class MazeGenerator():
             elif direction == Directions.WEST:
                 cell.W = False
                 next_cell.E = False
-
 
     def imperfect_Maze(self) -> None:
         """
@@ -198,9 +188,13 @@ class MazeGenerator():
                 else:
                     self.break_walls(cell)
         self.break_deadends()
-                
 
-    def create_output_file(self, entry: tuple[int, int], exitpoint: tuple[int, int], file: str, path: str) -> None:
+    def create_output_file(
+        self, entry: tuple[int, int],
+        exitpoint: tuple[int, int],
+        file: str,
+        path: str
+    ) -> None:
         """
         create the hexadecimal representaion of the maze
         """
@@ -220,7 +214,7 @@ class MazeGenerator():
             f.write(Exitpoint)
             f.write("\n")
             f.write(path)
-            f.write('\n')
+            f.write("\n")
 
     def reachable_neighbors(self, cell: Cell) -> list[tuple[Cell, Directions]]:
         """
@@ -231,7 +225,7 @@ class MazeGenerator():
                 a list of tuples containing each reachable neighboring cell
                 and the direction from the current cell to that neighbor
         """
-        n: list = []
+        n: list[tuple[Cell, Directions]] = []
         r = cell.r
         c = cell.c
 
@@ -245,7 +239,9 @@ class MazeGenerator():
             n.append((self.grid[r][c - 1], Directions.WEST))
         return n
 
-    def bfs_alg(self, entry: tuple[int, int], exitpoint: tuple[int, int]) -> str:
+    def bfs_alg(self,
+                entry: tuple[int, int],
+                exitpoint: tuple[int, int]) -> str:
         """
         find the shortest path between the entry and exit using BFS
         args:
@@ -269,7 +265,7 @@ class MazeGenerator():
                 if n not in explored:
                     front.append(n)
                     explored.append(n)
-                    parent[(n.r,n.c)] = ((current_cell.r ,current_cell.c), d)
+                    parent[(n.r, n.c)] = ((current_cell.r, current_cell.c), d)
 
         current = (xe, ye)
         start = (xs, ys)
@@ -282,9 +278,16 @@ class MazeGenerator():
             path.append(d)
             current = parent_cell
         path.reverse()
-        return ("".join(d.name[0] for d in path))
+        return "".join(d.name[0] for d in path)
 
-    def draw(self, entry: tuple[int, int], exitpoint: tuple[int, int], show_path: bool, color: str, color_reset: str) -> None:
+    def draw(
+        self,
+        entry: tuple[int, int],
+        exitpoint: tuple[int, int],
+        show_path: bool,
+        color: Colors,
+        color_reset: str,
+    ) -> None:
         """
         display the maze in the terminal
         the entry is displayed as S, the exit as E, and the shortest path
@@ -294,7 +297,8 @@ class MazeGenerator():
                 exitpoint: The row and column coordinates of the maze exit
                 show_path: Whether to display the calculated path
                 color: The terminal color used to draw the maze
-                color_reset: The terminal escape sequence used to reset the color
+                color_reset: The terminal escape sequence
+                used to reset the color
         """
         xs, ys = entry
         xe, ye = exitpoint
@@ -314,7 +318,9 @@ class MazeGenerator():
                 else:
                     middle_line += " "
                 if (cell.r, cell.c) in self.logo:
-                    middle_line += f"{Colors.LIGHT_WHITE.value}░░░{color.value}"
+                    middle_line += (
+                            f"{Colors.LIGHT_WHITE.value}░░░{color.value}"
+                            )
                     continue
                 if (cell.r, cell.c) == (xs, ys):
                     middle_line += " 🐀"
@@ -324,7 +330,9 @@ class MazeGenerator():
                     continue
                 if show_path:
                     if (cell.r, cell.c) in self.coordinate:
-                        middle_line += f"{Colors.LIGHT_WHITE.value} • {color.value}"
+                        middle_line += (
+                                f"{Colors.LIGHT_WHITE.value} • {color.value}"
+                                )
                         continue
                 middle_line += "   "
             if row[-1].E:
@@ -350,12 +358,18 @@ class MazeGenerator():
         print()
         print()
         print("1. Re-generate a new maze and display it")
-        print("2. Show/Hide a valid shortest path from the entrance to the exit")
+        print("2. Show/Hide a valid shortest path ", end="")
+        print("from the entrance to the exit")
         print("3. Change maze wall colors")
         print("4. Exit")
 
-
-    def logo_42(self, Entry: tuple[int, int], Exitpoint: tuple[int, int] ,width: int, height: int) -> None:        
+    def logo_42(
+        self,
+        Entry: tuple[int, int],
+        Exitpoint: tuple[int, int],
+        width: int,
+        height: int,
+    ) -> None:
         if width % 2 == 0:
             x = (width // 2) - 1
         else:
@@ -383,9 +397,8 @@ class MazeGenerator():
             (y + 1, x + 1),
             (y + 2, x + 1),
             (y + 2, x + 2),
-            (y + 2, x + 3)
+            (y + 2, x + 3),
         ]
-        print(self.logo)
 
         if (Entry in self.logo) or (Exitpoint in self.logo):
             raise Exception("Coordinate Error")
