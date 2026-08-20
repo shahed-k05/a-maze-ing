@@ -9,7 +9,23 @@ def main() -> None:
     if len(sys.argv) <= 1:
         raise Exception("The configuratoin file does not exist")
     try:
-        config: dict[str, str | tuple[int, int]] = read_config(sys.argv[1])
+        config = read_config(sys.argv[1])
+        if config is None:
+            return
+        if not isinstance(config["WIDTH"], str) or not isinstance(
+            config["HEIGHT"], str
+        ):
+            return
+        if not isinstance(config["SEED"], str):
+            return
+        if not isinstance(config["PERFECT"], str):
+            return
+        if not isinstance(config["OUTPUT_FILE"], str):
+            return
+        if not isinstance(config["ENTRY"], tuple) or not isinstance(
+            config["EXIT"], tuple
+        ):
+            return
         maze_gen_obj = MazeGenerator(
             int(config["WIDTH"]), int(config["HEIGHT"]), int(config["SEED"])
         )
