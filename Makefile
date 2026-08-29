@@ -1,7 +1,7 @@
 .PHONY: install run debug clean lint lint-strict
 
 install:
-	pip install -r requirements.txt
+	...
 run:
 	python3 a_maze_ing.py config.txt
 debug:
@@ -13,5 +13,4 @@ lint-strict:
 	flake8 .
 	mypy . --strict
 clean:
-	find . -type d -name "__pycache__" -exec rm -rf {} +
-	rm -rf .mypy_cache .pytest_cache
+	find . -type d \( -name "__pycache__" -o -name ".mypy_cache" -o -name ".pytest_cache" \) -exec rm -rf {} +

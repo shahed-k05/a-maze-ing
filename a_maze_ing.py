@@ -1,14 +1,15 @@
 import sys
 import random
-from mazegen.config_parser import read_config
+from mazegen.config_parser import read_config, ConfigError
 from mazegen.generator import MazeGenerator
 from mazegen.colors import Colors
 
 
 def main() -> None:
-    if len(sys.argv) <= 1:
-        raise Exception("The configuratoin file does not exist")
     try:
+        if len(sys.argv) <= 1:
+            raise Exception("The configuratoin file does not exist")
+
         config = read_config(sys.argv[1])
         if config is None:
             return
@@ -16,9 +17,9 @@ def main() -> None:
             config["HEIGHT"], str
         ):
             return
-        if not isinstance(config["SEED"], str):
+        if not isinstance(config["SEED"], str | None):
             return
-        if not isinstance(config["PERFECT"], str):
+        if not isinstance(config["PERFECT"], bool):
             return
         if not isinstance(config["OUTPUT_FILE"], str):
             return
@@ -26,9 +27,17 @@ def main() -> None:
             config["EXIT"], tuple
         ):
             return
-        maze_gen_obj = MazeGenerator(
-            int(config["WIDTH"]), int(config["HEIGHT"]), int(config["SEED"])
-        )
+        if config["SEED"] is None:
+            maze_gen_obj = MazeGenerator(
+                int(config["WIDTH"]), int(config["HEIGHT"]), config["SEED"]
+            )
+        else:
+            maze_gen_obj = MazeGenerator(
+                int(config["WIDTH"]),
+                int(config["HEIGHT"]),
+                int(config["SEED"])
+            )
+
         if int(config["WIDTH"]) < 8 or int(config["HEIGHT"]) < 6:
             print("Warning: maze too small")
         else:
@@ -46,7 +55,7 @@ def main() -> None:
                 return
 
         maze_gen_obj.generate(config["ENTRY"])
-        if config["PERFECT"] == "False":
+        if config["PERFECT"] is False:
             maze_gen_obj.imperfect_Maze()
 
         path = maze_gen_obj.bfs_alg(config["ENTRY"], config["EXIT"])
@@ -56,43 +65,54 @@ def main() -> None:
         show_path = True
         color: Colors = Colors.DEFAULT
         color_reset = "\u001b[0m"
-        while True:
-            maze_gen_obj.draw(
-                config["ENTRY"], config["EXIT"], show_path, color, color_reset
-            )
-            action = input()
-            if action == "1":
-                maze_gen_obj = MazeGenerator(
-                    int(config["WIDTH"]), int(config["HEIGHT"]), None
+        try:
+            while True:
+
+                maze_gen_obj.draw(
+                    config["ENTRY"],
+                    config["EXIT"],
+                    show_path,
+                    color,
+                    color_reset
                 )
-                if int(config["WIDTH"]) < 8 or int(config["HEIGHT"]) < 6:
-                    print("Warning: maze too small")
-                else:
-                    maze_gen_obj.logo_42(
-                        config["ENTRY"],
-                        config["EXIT"],
-                        int(config["WIDTH"]),
-                        int(config["HEIGHT"]),
+                action = input()
+                if action == "1":
+                    maze_gen_obj = MazeGenerator(
+                        int(config["WIDTH"]), int(config["HEIGHT"]), None
                     )
+                    if int(config["WIDTH"]) < 8 or int(config["HEIGHT"]) < 6:
+                        print("Warning: maze too small")
+                    else:
+                        maze_gen_obj.logo_42(
+                            config["ENTRY"],
+                            config["EXIT"],
+                            int(config["WIDTH"]),
+                            int(config["HEIGHT"]),
+                        )
 
-                maze_gen_obj.generate(config["ENTRY"])
-                if config["PERFECT"] == "False":
-                    maze_gen_obj.imperfect_Maze()
+                    maze_gen_obj.generate(config["ENTRY"])
+                    if config["PERFECT"] is False:
+                        maze_gen_obj.imperfect_Maze()
 
-                path = maze_gen_obj.bfs_alg(config["ENTRY"], config["EXIT"])
-                maze_gen_obj.create_output_file(
-                    config["ENTRY"], config["EXIT"],
-                    config["OUTPUT_FILE"], path
-                )
-            if action == "2":
-                show_path = not show_path
+                    path = maze_gen_obj.bfs_alg(
+                        config["ENTRY"],
+                        config["EXIT"])
+                    maze_gen_obj.create_output_file(
+                        config["ENTRY"],
+                        config["EXIT"], config["OUTPUT_FILE"], path)
+                if action == "2":
+                    show_path = not show_path
 
-            if action == "3":
-                color = random.choice(list(Colors))
+                if action == "3":
+                    color = random.choice(list(Colors))
 
-            if action == "4":
-                break
+                if action == "4":
+                    break
+        except KeyboardInterrupt as e:
+            print(e)
 
+    except ConfigError as e:
+        print(e)
     except Exception as e:
         print(e)
 

@@ -140,6 +140,7 @@ class MazeGenerator:
         return len(visited) == 9
 
     def break_deadends(self) -> None:
+        deadends = []
         for row in self.grid:
             for cell in row:
                 counter = 0
@@ -153,8 +154,11 @@ class MazeGenerator:
                     counter += 1
                 if cell.S:
                     counter += 1
-                if counter >= 3:
-                    self.break_walls(cell)
+                if counter == 3:
+                    deadends.append(cell)
+        while len(deadends) > 0:
+            cell = deadends.pop()
+            self.break_walls(cell)
 
     def break_walls(self, cell: Cell) -> None:
         n = self.n_neighbors(cell)
@@ -187,7 +191,7 @@ class MazeGenerator:
                     continue
                 else:
                     self.break_walls(cell)
-        self.break_deadends()
+            self.break_deadends()
 
     def create_output_file(
         self, entry: tuple[int, int],
