@@ -1,4 +1,3 @@
-*This activity has been created as part of the 42 curriculum by sshakhat, syasin*
 # A-Maze-ing
 ## Description
 This is the "A-MAZE-ING" project from 42 School. It was written in python 3
